@@ -53,6 +53,7 @@ def train(model, model_label, training_data, batch_size=256, epochs=10):
 def train_student(model, model_label, training_data, teacher_model_path,
                   logits_paths=('train_logits.npy', 'test_logits.npy'),
                   batch_size=256, epochs=10, temp=5.0, lambda_weight=0.1):
+    model.summary()
     temperature = temp
     (x_train, y_train), (x_test, y_test), mapping, nb_classes = training_data
 
@@ -86,6 +87,8 @@ def train_student(model, model_label, training_data, teacher_model_path,
     model = Model(model.input, output)
     # now model outputs 26+26 dimensional vectors
 
+    model.summary()
+
     #internal functions
     def knowledge_distillation_loss(y_true, y_pred, lambda_const):
         # split in
@@ -114,12 +117,12 @@ def train_student(model, model_label, training_data, teacher_model_path,
         y_pred = y_pred[:, :nb_classes]
         return logloss(y_true, y_pred)
 
-    # logloss with only soft probabilities and targets
-    def soft_logloss(y_true, y_pred):
-        logits = y_true[:, nb_classes:]
-        y_soft = K.softmax(logits / temperature)
-        y_pred_soft = y_pred[:, nb_classes:]
-        return logloss(y_soft, y_pred_soft)
+    # # logloss with only soft probabilities and targets
+    # def soft_logloss(y_true, y_pred):
+    #     logits = y_true[:, nb_classes:]
+    #     y_soft = K.softmax(logits / temperature)
+    #     y_pred_soft = y_pred[:, nb_classes:]
+    #     return logloss(y_soft, y_pred_soft)
 
     lambda_const = lambda_weight
 
@@ -174,7 +177,7 @@ if __name__ == '__main__':
     parser.add_argument('--width', type=int, default=28, help='Width of the images')
     parser.add_argument('--height', type=int, default=28, help='Height of the images')
     parser.add_argument('--max', type=int, default=None, help='Max amount of data to use')
-    parser.add_argument('--epochs', type=int, default=12, help='Number of epochs to train on')
+    parser.add_argument('--epochs', type=int, default=1, help='Number of epochs to train on')
     #parser.add_argument('--verbose', action='store_true', default=False, help='Enables verbose printing')
     args = parser.parse_args()
 
