@@ -15,6 +15,9 @@ import numpy as np
 from helpers import load_data, save_logits
 from models import build_mlp, build_cnn
 
+from keras.utils import plot_model
+from ann_visualizer.visualize import ann_viz
+
 def train(model, model_label, training_data, batch_size=256, epochs=10):
     (x_train, y_train), (x_test, y_test), mapping, nb_classes = training_data
 
@@ -88,6 +91,8 @@ def train_student(model, model_label, training_data, teacher_model_path,
     # now model outputs 26+26 dimensional vectors
 
     model.summary()
+    plot_model(model, to_file='student_model_plot.png', show_shapes=True, show_layer_names=True)
+    # ann_viz(model, title="Modified student model")
 
     #internal functions
     def knowledge_distillation_loss(y_true, y_pred, lambda_const):
