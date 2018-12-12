@@ -1,5 +1,3 @@
-## Knowledge distillation experiments
-
 ### How does it work?
 
 It seems like it works as follows:
@@ -11,6 +9,53 @@ It seems like it works as follows:
 6) Define modified loss function as `L_d = lambda * l(y_true, y_pred) + l(y_soft, y_pred_soft)`.
 7) Train distilled model on the modified transfer dataset.
 8) Predictions made by the student model are extracted as the first half of its outputs.
+
+Here are Keras model summarires before and after modifying the student model.
+
+```
+BEFORE:
+Layer (type)                 Output Shape              Param #   
+=================================================================
+flatten_1 (Flatten)          (None, 784)               0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 32)                25120     
+_________________________________________________________________
+dropout_1 (Dropout)          (None, 32)                0         
+_________________________________________________________________
+dense_2 (Dense)              (None, 27)                891       
+_________________________________________________________________
+activation_1 (Activation)    (None, 27)                0         
+=================================================================
+Total params: 26,011
+Trainable params: 26,011
+Non-trainable params: 0
+
+AFTER:
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+flatten_1_input (InputLayer)     (None, 28, 28, 1)     0                                            
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 784)           0           flatten_1_input[0][0]            
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 32)            25120       flatten_1[0][0]                  
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 32)            0           dense_1[0][0]                    
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 27)            891         dropout_1[0][0]                  
+____________________________________________________________________________________________________
+lambda_1 (Lambda)                (None, 27)            0           dense_2[0][0]                    
+____________________________________________________________________________________________________
+activation_2 (Activation)        (None, 27)            0           dense_2[0][0]                    
+____________________________________________________________________________________________________
+activation_3 (Activation)        (None, 27)            0           lambda_1[0][0]                   
+____________________________________________________________________________________________________
+concatenate_1 (Concatenate)      (None, 54)            0           activation_2[0][0]               
+                                                                   activation_3[0][0]               
+====================================================================================================
+Total params: 26,011
+Trainable params: 26,011
+Non-trainable params: 0
+```
 
 ### How to run the code
 
