@@ -5,57 +5,12 @@ It seems like it works as follows:
 2) Select a subset of training examples, transfer dataset, (or use the full training dataset) and run it throught the teacher model. Save its logits (outputs before softmax) for each example, `logits_t`. Length of logits vector is `dim(logits_t) = N`, subscript `_t` means teacher.
 3) Modify transfer dataset labels such that `y_d = [y, logits_t]`, `_d` stands for distilled.
 4) Define a student model (usually small and fast model, such as MLP). Number of outputs should be the same as the number of classes for a big model, `dim(logits_s)=N`, subscript `_s` means student.
-5) Modify student model by adding one more layer, which serves as input thourh which logits of teacher model will be fed. Now the output of student model is `output_d=[softmax(logits_1), softmax(logits_2/T)]`, where `T` is a free parameter called temperature. Note that `dim(output_d)=2N`. `logits_1` is original logits of the student model, `logits_2` is a new input.
-6) Define modified loss function as `L_d = lambda * l(y_true, y_pred) + l(y_soft, y_pred_soft)`.
+5) Modify student model by adding one more layer, which will generate additional output to match logits of teacher model. Now the output of student model is `output_d=[softmax(logits_1), softmax(logits_2/T)]`, where `T` is a free parameter called temperature. Note that `dim(output_d)=2N`, `logits_2` will correponds to `logits_t`.
+6) Define modified loss function as `L_d = lambda * l(y_true, y_pred) + l(y_soft, y_pred_soft)`, where `l()` is a cross entropy function.
 7) Train distilled model on the modified transfer dataset.
 8) Predictions made by the student model are extracted as the first half of its outputs.
 
-Here are Keras model summarires before and after modifying the student model.
-
-```
-BEFORE:
-Layer (type)                 Output Shape              Param #   
-=================================================================
-flatten_1 (Flatten)          (None, 784)               0         
-_________________________________________________________________
-dense_1 (Dense)              (None, 32)                25120     
-_________________________________________________________________
-dropout_1 (Dropout)          (None, 32)                0         
-_________________________________________________________________
-dense_2 (Dense)              (None, 27)                891       
-_________________________________________________________________
-activation_1 (Activation)    (None, 27)                0         
-=================================================================
-Total params: 26,011
-Trainable params: 26,011
-Non-trainable params: 0
-
-AFTER:
-Layer (type)                     Output Shape          Param #     Connected to                     
-====================================================================================================
-flatten_1_input (InputLayer)     (None, 28, 28, 1)     0                                            
-____________________________________________________________________________________________________
-flatten_1 (Flatten)              (None, 784)           0           flatten_1_input[0][0]            
-____________________________________________________________________________________________________
-dense_1 (Dense)                  (None, 32)            25120       flatten_1[0][0]                  
-____________________________________________________________________________________________________
-dropout_1 (Dropout)              (None, 32)            0           dense_1[0][0]                    
-____________________________________________________________________________________________________
-dense_2 (Dense)                  (None, 27)            891         dropout_1[0][0]                  
-____________________________________________________________________________________________________
-lambda_1 (Lambda)                (None, 27)            0           dense_2[0][0]                    
-____________________________________________________________________________________________________
-activation_2 (Activation)        (None, 27)            0           dense_2[0][0]                    
-____________________________________________________________________________________________________
-activation_3 (Activation)        (None, 27)            0           lambda_1[0][0]                   
-____________________________________________________________________________________________________
-concatenate_1 (Concatenate)      (None, 54)            0           activation_2[0][0]               
-                                                                   activation_3[0][0]               
-====================================================================================================
-Total params: 26,011
-Trainable params: 26,011
-Non-trainable params: 0
-```
+![Here is the model diagram of the student model](https://github.com/ychervonyi/distillation/blob/master/student_model_plot.png)
 
 ### How to run the code
 
