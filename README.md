@@ -1,4 +1,4 @@
-### DIstillation
+### Distillation
 
 It seems like the procedure is the following:
 1) Train teacher network (usually big and slow for example CNN) on a training dataset. Let the number of classes be `N`.
