@@ -1,14 +1,14 @@
 ### How does it work?
 
 It seems like it works as follows:
-1) Train teacher network (usually big and slow model, such as CNN) on a training dataset. Let number of classes be `N`.
-2) Select a subset of training examples, transfer dataset, (or use the full training dataset) and run it throught the teacher model. Save its logits (outputs before softmax) for each example, `logits_t`. Length of logits vector is `dim(logits_t) = N`, subscript `_t` means teacher.
+1) Train teacher network (usually big and slow for example CNN) on a training dataset. Let the number of classes be `N`.
+2) Select a subset of training examples, transfer dataset, (or use the full training dataset) and run it through teacher model. Save its logits (outputs before softmax), `logits_t`, for each example. `_t` stands for teacher, `dim(logits_t) = N`.
 3) Modify transfer dataset labels such that `y_d = [y, logits_t]`, `_d` stands for distilled.
-4) Define a student model (usually small and fast model, such as MLP). Number of outputs should be the same as the number of classes for a big model, `dim(logits_s)=N`, subscript `_s` means student.
-5) Modify student model by adding one more layer, which will generate additional output to match logits of teacher model. Now the output of student model is `output_d=[softmax(logits_1), softmax(logits_2/T)]`, where `T` is a free parameter called temperature. Note that `dim(output_d)=2N`, `logits_2` will correponds to `logits_t`.
+4) Define student model (usually small and fast for example MLP). The number of outputs should be the same as the number of classes for teacher model, `dim(logits_s) = N`, subscript `_s` means student.
+5) Modify student model by adding one more layer, which will generate additional output to match logits of teacher model. Now the output of student model is `output_d = [softmax(logits_1), softmax(logits_2/T)]`, where `T` is a free parameter called temperature. Note that `dim(output_d) = 2N`, `logits_2` will correponds to `logits_t`.
 6) Define modified loss function as `L_d = lambda * l(y_true, y_pred) + l(y_soft, y_pred_soft)`, where `l()` is a cross entropy function.
 7) Train distilled model on the modified transfer dataset.
-8) Predictions made by the student model are extracted as the first half of its outputs.
+8) Predictions made by student model are extracted as the first half of its outputs.
 
 ![Here is the model diagram of the student model](https://github.com/ychervonyi/distillation/blob/master/student_model_plot.png)
 
