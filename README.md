@@ -1,6 +1,6 @@
-### How does it work?
+### DIstillation
 
-It seems like it works as follows:
+It seems like the procedure is the following:
 1) Train teacher network (usually big and slow for example CNN) on a training dataset. Let the number of classes be `N`.
 2) Select a subset of training examples, transfer dataset, (or use the full training dataset) and run it through teacher model. Save its logits (outputs before softmax), `logits_t`, for each example. `_t` stands for teacher, `dim(logits_t) = N`.
 3) Modify transfer dataset labels such that `y_d = [y, logits_t]`, `_d` stands for distilled.
